@@ -16,6 +16,15 @@ task :build do |t|
   install
 end
 
+task :compile do |t|
+  sh "cd ext && ruby extconf.rb --with-mysql_config=`which mysql_config`"
+  sh "cd ext && make"
+end
+
+task :clean do |t|
+  sh "cd ext && make clean"
+end
+
 def configure
   puts "** building gem"
   puts %x{gem build mysqlplus.gemspec}

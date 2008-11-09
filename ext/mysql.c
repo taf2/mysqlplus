@@ -30,6 +30,8 @@
 #include <mysql/mysqld_error.h>
 #endif
 
+#include "vio.h"
+
 #define MYSQL_RUBY_VERSION 20800
 
 #define GC_STORE_RESULT_LIMIT 20
@@ -768,8 +770,8 @@ static VALUE socket(VALUE obj)
 static VALUE socket_type(VALUE obj)
 {
     MYSQL* m = GetHandler(obj);
-    VALUE description = vio_description( m->net.vio );
-    return NILorSTRING( description );
+    const char* description = vio_description( m->net.vio );
+    return (description?  ID2SYM(rb_intern(description)) : Qnil);
 }
 
 /* blocking */
@@ -839,12 +841,12 @@ static VALUE schedule(VALUE obj, VALUE timeout)
       rb_raise(eMysql, "query: timeout");
     }
 
+    return Qnil;
 }
 
 /* async_query(sql,timeout=nil) */
 static VALUE async_query(int argc, VALUE* argv, VALUE obj)
 {
-  MYSQL* m = GetHandler(obj); 
   VALUE sql, timeout;
 
   rb_scan_args(argc, argv, "11", &sql, &timeout);
@@ -1578,6 +1580,7 @@ static VALUE stmt_execute(int argc, VALUE *argv, VALUE obj)
                     VALUE a = rb_funcall(argv[i], rb_intern("to_a"), 0);
                     s->param.bind[i].buffer_type = MYSQL_TYPE_DATETIME;
                     s->param.bind[i].buffer = &(s->param.buffer[i]);
+                    t.time_type= MYSQL_TIMESTAMP_DATETIME;
                     t.second_part = 0;
                     t.neg = 0;
                     t.second = FIX2INT(RARRAY(a)->ptr[0]);
@@ -1591,6 +1594,7 @@ static VALUE stmt_execute(int argc, VALUE *argv, VALUE obj)
                     MYSQL_TIME t;
                     s->param.bind[i].buffer_type = MYSQL_TYPE_DATETIME;
                     s->param.bind[i].buffer = &(s->param.buffer[i]);
+                    t.time_type= MYSQL_TIMESTAMP_DATETIME;
                     t.second_part = 0;
                     t.neg = 0;
                     t.second = NUM2INT(rb_iv_get(argv[i], "second"));
@@ -1962,7 +1966,7 @@ static VALUE time_initialize(int argc, VALUE* argv, VALUE obj)
 static VALUE time_inspect(VALUE obj)
 {
     char buf[36];
-    sprintf(buf, "#<Mysql::Time:%04d-%02d-%02d %02d:%02d:%02d>",
+    sprintf(buf, "#<Mysql::Time:%04ld-%02ld-%02ld %02ld:%02ld:%02ld>",
 	    NUM2INT(rb_iv_get(obj, "year")),
 	    NUM2INT(rb_iv_get(obj, "month")),
 	    NUM2INT(rb_iv_get(obj, "day")),
@@ -1975,7 +1979,7 @@ static VALUE time_inspect(VALUE obj)
 static VALUE time_to_s(VALUE obj)
 {
     char buf[20];
-    sprintf(buf, "%04d-%02d-%02d %02d:%02d:%02d",
+    sprintf(buf, "%04ld-%02ld-%02ld %02ld:%02ld:%02ld",
 	    NUM2INT(rb_iv_get(obj, "year")),
 	    NUM2INT(rb_iv_get(obj, "month")),
 	    NUM2INT(rb_iv_get(obj, "day")),

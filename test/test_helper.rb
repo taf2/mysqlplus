@@ -1,4 +1,7 @@
-require 'rubygems'
+#require 'rubygems'
+# load mysqlplus from ext dir
+$:.unshift File.join(File.dirname(__FILE__),'..','lib')
+$:.unshift File.join(File.dirname(__FILE__),'..','ext')
 require 'mysqlplus'
 
 class MysqlTest
