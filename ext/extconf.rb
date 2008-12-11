@@ -13,8 +13,8 @@ elsif mc = with_config('mysql-config') then
   $CPPFLAGS += ' ' + cflags
   $libs = libs + " " + $libs
 elsif find_executable('mysql_config')
-  $CFLAGS += ' ' + `mysql_config --cflags`
-  $libs += ' ' + `mysql_config --libs`
+  $CFLAGS += ' ' + `mysql_config --cflags`.chomp
+  $libs += ' ' + `mysql_config --libs`.chomp
 else
   inc, lib = dir_config('mysql', '/usr/local')
   libs = ['m', 'z', 'socket', 'nsl', 'mygcc']

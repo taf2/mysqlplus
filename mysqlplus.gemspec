@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 		"test/native_threaded_test.rb",
 		"test/c_threaded_test.rb",
 		"test/evented_test.rb",
+		"ext/vio.h",
 		"ext/error_const.h",
 		"ext/extconf.rb",
 		"ext/mysql.c"
